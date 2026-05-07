@@ -202,46 +202,33 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   revealElements.forEach(el => observer.observe(el));
 
-  // ---------- Contact form ----------
+  // ---------- Contact form (step 1 of the intake wizard) ----------
+  // On submit, save the contact data to localStorage and hand off to intake.html,
+  // which presents intake forms based on the selected interests.
   const contactForm = document.getElementById('contactForm');
+  const INTAKE_DRAFT_KEY = 'intake.draft';
 
   if (contactForm) {
     contactForm.addEventListener('submit', (e) => {
       e.preventDefault();
 
       const formData = new FormData(contactForm);
-      const dataOut = Object.fromEntries(formData);
+      const contact = Object.fromEntries(formData);
 
       const interests = [];
       contactForm.querySelectorAll('input[name="interest"]:checked').forEach(cb => {
         interests.push(cb.value);
       });
-      dataOut.interests = interests;
+      contact.interests = interests;
 
-      console.log('Form submission:', dataOut);
+      // Merge with any existing draft so the user doesn't lose intake data
+      // they've already filled in if they come back to step 1 to edit it.
+      let draft = {};
+      try { draft = JSON.parse(localStorage.getItem(INTAKE_DRAFT_KEY) || '{}'); } catch (_) {}
+      draft.contact = contact;
+      try { localStorage.setItem(INTAKE_DRAFT_KEY, JSON.stringify(draft)); } catch (_) {}
 
-      const successTitle = (data && data.contact && data.contact.form && data.contact.form.successTitle)
-        || 'Message Sent';
-      const successMessage = (data && data.contact && data.contact.form && data.contact.form.successMessage)
-        || 'Dr. Ehrlich will personally review your inquiry and get back to you shortly.';
-
-      const formWrap = contactForm.parentElement;
-      const titleEl = document.createElement('h3');
-      titleEl.textContent = successTitle;
-      const msgEl = document.createElement('p');
-      msgEl.textContent = successMessage;
-
-      formWrap.innerHTML = `
-        <div class="form-success">
-          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-            <polyline points="22 4 12 14.01 9 11.01"/>
-          </svg>
-        </div>
-      `;
-      const wrap = formWrap.querySelector('.form-success');
-      wrap.appendChild(titleEl);
-      wrap.appendChild(msgEl);
+      window.location.href = 'intake.html';
     });
   }
 

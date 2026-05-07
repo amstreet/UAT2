@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Intake — Timothy Ehrlich, MD</title>
+  <meta name="description" content="Confidential patient intake forms for Dr. Timothy Ehrlich, MD.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ---------- Intake-specific layout ---------- */
+    body { background: var(--color-bg); }
+
+    .intake-shell {
+      min-height: 100vh;
+      padding: 0 var(--space-md) var(--space-4xl);
+    }
+
+    /* Slim top bar (no full nav — the patient is in a focused flow). */
+    .intake-topbar {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: var(--space-lg) 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--color-border-light);
+    }
+    .intake-topbar .topbar-logo img {
+      height: 38px; width: auto; display: block;
+    }
+    .intake-topbar .topbar-back {
+      font-size: 0.85rem;
+      color: var(--color-text-secondary);
+      display: inline-flex; align-items: center; gap: 0.4rem;
+    }
+    .intake-topbar .topbar-back:hover { color: var(--color-primary); }
+
+    /* Step indicator */
+    .stepper {
+      max-width: 880px;
+      margin: var(--space-2xl) auto var(--space-xl);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+    }
+    .stepper .step {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.4rem 0.85rem;
+      border-radius: 999px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border-light);
+      transition: all var(--transition-fast);
+    }
+    .stepper .step .step-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 1.4rem; height: 1.4rem; border-radius: 50%;
+      background: var(--color-bg-alt); color: var(--color-text-muted);
+      font-size: 0.7rem; font-weight: 600;
+    }
+    .stepper .step.active {
+      background: var(--color-primary); color: #fff; border-color: var(--color-primary);
+    }
+    .stepper .step.active .step-num { background: rgba(255,255,255,0.18); color: #fff; }
+    .stepper .step.done { color: var(--color-primary); border-color: var(--color-primary-light); }
+    .stepper .step.done .step-num {
+      background: var(--color-primary-light); color: #fff;
+    }
+    .stepper .step-sep {
+      width: 18px; height: 1px; background: var(--color-border);
+    }
+    @media (max-width: 600px) {
+      .stepper .step-sep { display: none; }
+    }
+
+    /* Step card */
+    .step-card {
+      max-width: 720px;
+      margin: 0 auto;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border-light);
+      border-radius: var(--radius-lg);
+      padding: var(--space-2xl) var(--space-2xl) var(--space-xl);
+      box-shadow: 0 8px 30px rgba(15, 63, 102, 0.04);
+    }
+    .step-card .step-eyebrow {
+      font-size: 0.72rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.16em;
+      color: var(--color-accent);
+      margin-bottom: var(--space-sm);
+    }
+    .step-card .step-title {
+      font-family: var(--font-heading);
+      font-size: clamp(1.6rem, 3vw, 2.1rem);
+      font-weight: 500;
+      color: var(--color-primary);
+      line-height: 1.18;
+      margin-bottom: var(--space-md);
+    }
+    .step-card .step-intro {
+      font-size: 0.96rem;
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-xl);
+      line-height: 1.65;
+    }
+
+    /* Sub-section inside an intake step */
+    .intake-section {
+      border-top: 1px solid var(--color-border-light);
+      padding-top: var(--space-xl);
+      margin-top: var(--space-xl);
+    }
+    .intake-section:first-of-type { border-top: 0; padding-top: 0; margin-top: 0; }
+    .intake-section > h3 {
+      font-family: var(--font-heading);
+      font-size: 1.2rem; font-weight: 500;
+      color: var(--color-primary);
+      margin-bottom: 0.35rem;
+    }
+    .intake-section > .section-note {
+      font-size: 0.85rem; color: var(--color-text-muted);
+      margin-bottom: var(--space-md);
+    }
+    .intake-section > h4 {
+      font-size: 0.78rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--color-accent);
+      margin-top: var(--space-md);
+      margin-bottom: var(--space-sm);
+    }
+
+    /* Form rows */
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); }
+    .field-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    @media (max-width: 600px) { .field-row, .field-row.cols-3 { grid-template-columns: 1fr; } }
+
+    .field { margin-bottom: var(--space-md); }
+    .field > label.field-label {
+      display: block;
+      font-size: 0.82rem; font-weight: 500;
+      color: var(--color-primary);
+      margin-bottom: 0.3rem;
+    }
+    .field input[type="text"],
+    .field input[type="email"],
+    .field input[type="tel"],
+    .field input[type="number"],
+    .field input[type="date"],
+    .field textarea,
+    .field select {
+      width: 100%;
+      padding: 0.6rem 0.8rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      background: var(--color-bg);
+      color: var(--color-text);
+      font: inherit;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+      outline: none;
+    }
+    .field input:focus, .field textarea:focus, .field select:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(31, 95, 148, 0.12);
+    }
+    .field textarea { min-height: 90px; resize: vertical; }
+    .field .field-hint {
+      font-size: 0.74rem; color: var(--color-text-muted);
+      margin-top: 0.25rem;
+    }
+
+    /* Checkbox / radio groups */
+    .check-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 0.5rem 1rem;
+      margin-top: 0.4rem;
+    }
+    .check-group.tight {
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    }
+    .check-line, .radio-line {
+      display: inline-flex; align-items: flex-start; gap: 0.55rem;
+      padding: 0.45rem 0.6rem;
+      border: 1px solid var(--color-border-light);
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: var(--color-text);
+      transition: background var(--transition-fast), border-color var(--transition-fast);
+      background: var(--color-surface);
+      line-height: 1.4;
+    }
+    .check-line:hover, .radio-line:hover { border-color: var(--color-primary); }
+    .check-line input, .radio-line input {
+      margin-top: 0.18rem;
+      width: 1rem; height: 1rem; flex-shrink: 0;
+      accent-color: var(--color-primary);
+    }
+    .check-line input:checked + span, .radio-line input:checked + span {
+      color: var(--color-primary); font-weight: 500;
+    }
+    .check-line:has(input:checked), .radio-line:has(input:checked) {
+      border-color: var(--color-primary);
+      background: var(--color-accent-subtle);
+    }
+
+    /* Inline radio group (e.g., severity: Mild / Moderate / Severe) */
+    .inline-radios {
+      display: inline-flex; flex-wrap: wrap; gap: 0.5rem;
+      margin-top: 0.4rem;
+    }
+    .inline-radios .radio-line { padding: 0.4rem 0.85rem; }
+
+    /* Step navigation footer */
+    .step-actions {
+      max-width: 720px; margin: var(--space-xl) auto 0;
+      display: flex; flex-wrap: wrap; gap: 0.75rem;
+      justify-content: space-between;
+    }
+    .step-actions .actions-end {
+      display: inline-flex; gap: 0.75rem; align-items: center;
+    }
+
+    /* Review step */
+    .review-section {
+      border: 1px solid var(--color-border-light);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg);
+      margin-bottom: var(--space-md);
+      background: var(--color-bg);
+    }
+    .review-section h3 {
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      font-weight: 500;
+      color: var(--color-primary);
+      margin: 0;
+    }
+    .review-head {
+      display: flex; flex-wrap: wrap; align-items: center;
+      justify-content: space-between; gap: 0.5rem;
+      margin-bottom: 0.85rem;
+    }
+    .review-edit-link {
+      font-size: 0.82rem; font-weight: 500;
+      color: var(--color-primary);
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      cursor: pointer;
+      background: none; border: none; padding: 0;
+      font-family: inherit;
+    }
+    .review-edit-link:hover { color: var(--color-accent); }
+    .review-pairs {
+      display: grid;
+      grid-template-columns: max-content 1fr;
+      gap: 0.4rem 1rem;
+      font-size: 0.9rem;
+    }
+    @media (max-width: 600px) { .review-pairs { grid-template-columns: 1fr; gap: 0.1rem 0; } }
+    .review-pairs dt { color: var(--color-text-muted); font-weight: 500; }
+    .review-pairs dd { color: var(--color-text); margin: 0; }
+    .review-pairs dd ul { padding-left: 1.1rem; margin: 0.15rem 0 0.4rem; }
+    .review-empty {
+      font-style: italic; color: var(--color-text-muted); font-size: 0.88rem;
+    }
+
+    /* Submit-stub notice */
+    .stub-notice {
+      background: rgba(196, 91, 91, 0.06);
+      border: 1px solid rgba(196, 91, 91, 0.25);
+      color: var(--color-text);
+      padding: var(--space-md) var(--space-lg);
+      border-radius: var(--radius-md);
+      margin-top: var(--space-md);
+      font-size: 0.92rem;
+    }
+    .stub-notice strong { color: var(--color-error); }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 1.25rem; left: 50%; transform: translateX(-50%);
+      background: var(--color-primary-dark); color: #fff;
+      padding: 0.65rem 1.1rem; border-radius: 8px; font-size: 0.88rem;
+      box-shadow: 0 8px 30px rgba(15, 63, 102, 0.25);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s; z-index: 100;
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+  <div class="intake-shell">
+
+    <!-- Slim top bar -->
+    <div class="intake-topbar">
+      <a href="index.html" class="topbar-logo" aria-label="Timothy Ehrlich, M.D. — Home">
+        <img src="logo-blue.png" alt="Timothy Ehrlich, M.D.">
+      </a>
+      <a href="index.html" class="topbar-back">← Back to site</a>
+    </div>
+
+    <!-- Step indicator (rendered by JS based on selected interests) -->
+    <nav id="stepper" class="stepper" aria-label="Intake progress"></nav>
+
+    <!-- Active step card (rendered by JS) -->
+    <main id="stepCard" class="step-card" aria-live="polite"></main>
+
+    <!-- Step nav (Back / Next or Submit) -->
+    <div id="stepActions" class="step-actions"></div>
+
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="intake.js"></script>
+</body>
+</html>
