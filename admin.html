@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Site Content Editor — Timothy Ehrlich, MD</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1F5F94;
+      --primary-light: #2E78B3;
+      --primary-dark: #0F3F66;
+      --accent: #5B8EA5;
+      --bg: #F7FAFC;
+      --bg-alt: #EDF2F7;
+      --surface: #FFFFFF;
+      --border: #D4DCE3;
+      --border-light: #E6EBF0;
+      --text: #1A2430;
+      --text-secondary: #4A5765;
+      --text-muted: #8596A3;
+      --success: #2E8A6A;
+      --error: #C45B5B;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      padding: 2rem 1rem 6rem;
+    }
+    .wrap { max-width: 880px; margin: 0 auto; }
+    .page-header {
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .page-header h1 { font-size: 1.6rem; color: var(--primary); margin-bottom: .35rem; }
+    .page-header p { color: var(--text-secondary); font-size: .95rem; }
+    .page-header .meta {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      margin-top: .75rem; font-size: .82rem; color: var(--text-muted);
+    }
+    .status {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .25rem .6rem; border-radius: 4px; background: var(--bg-alt);
+      color: var(--text-secondary);
+    }
+    .status.ok    { background: rgba(46, 138, 106, 0.1); color: var(--success); }
+    .status.warn  { background: rgba(196, 91, 91, 0.1); color: var(--error); }
+
+    details {
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+    details > summary {
+      cursor: pointer; user-select: none;
+      padding: 1rem 1.25rem;
+      font-weight: 600; color: var(--primary);
+      list-style: none;
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface);
+      transition: background .15s;
+    }
+    details > summary::-webkit-details-marker { display: none; }
+    details > summary::after {
+      content: '+';
+      font-size: 1.4rem; color: var(--text-muted); line-height: 1;
+      transition: transform .2s;
+    }
+    details[open] > summary { background: var(--bg-alt); border-bottom: 1px solid var(--border-light); }
+    details[open] > summary::after { content: '–'; }
+    details > .details-body { padding: 1.25rem 1.5rem 1.5rem; }
+
+    fieldset {
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 1rem 1.1rem 1.1rem;
+      margin-top: 1rem;
+    }
+    fieldset > legend {
+      padding: 0 .4rem; font-size: .82rem; font-weight: 600;
+      color: var(--accent); text-transform: uppercase; letter-spacing: .1em;
+    }
+
+    .field { margin-bottom: 1rem; }
+    .field:last-child { margin-bottom: 0; }
+    .field label {
+      display: block;
+      font-size: .82rem; font-weight: 500;
+      color: var(--text); margin-bottom: .3rem;
+    }
+    .field .hint {
+      font-size: .75rem; color: var(--text-muted); margin-top: .3rem;
+    }
+    .field input[type="text"],
+    .field input[type="url"],
+    .field textarea {
+      width: 100%;
+      padding: .55rem .7rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--surface);
+      color: var(--text);
+      font: inherit;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .field input:focus,
+    .field textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(31, 95, 148, 0.12);
+    }
+    .field textarea { min-height: 80px; resize: vertical; }
+    .field textarea.tall { min-height: 130px; }
+
+    .row-2 {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+    }
+    @media (max-width: 600px) {
+      .row-2 { grid-template-columns: 1fr; }
+    }
+
+    .check {
+      display: inline-flex; align-items: center; gap: .5rem;
+      font-size: .9rem; color: var(--text);
+    }
+    .check input { width: 1rem; height: 1rem; }
+
+    .actions {
+      position: sticky; bottom: 0;
+      margin-top: 2rem;
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      display: flex; flex-wrap: wrap; gap: .75rem; align-items: center;
+      box-shadow: 0 -4px 16px rgba(15, 63, 102, 0.06);
+    }
+    .actions .spacer { flex: 1; }
+    .btn {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .65rem 1.25rem;
+      font: inherit; font-weight: 500; font-size: .9rem;
+      border-radius: 4px; border: 1px solid transparent;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .btn-primary  { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-light); }
+    .btn-ghost    { background: transparent; color: var(--text-secondary); border-color: var(--border); }
+    .btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
+    .btn-danger   { background: transparent; color: var(--error); border-color: var(--border); }
+    .btn-danger:hover { border-color: var(--error); }
+
+    .toast {
+      position: fixed; bottom: 1.25rem; left: 50%; transform: translateX(-50%);
+      background: var(--primary-dark); color: #fff;
+      padding: .65rem 1.1rem;
+      border-radius: 8px; font-size: .88rem;
+      box-shadow: 0 8px 30px rgba(15, 63, 102, 0.25);
+      opacity: 0; pointer-events: none;
+      transition: opacity .2s;
+      z-index: 100;
+    }
+    .toast.show { opacity: 1; }
+
+    .workflow {
+      background: rgba(31, 95, 148, 0.06);
+      border: 1px solid rgba(31, 95, 148, 0.18);
+      border-radius: 8px;
+      padding: .9rem 1.1rem;
+      margin-top: 1rem;
+      font-size: .88rem; color: var(--text-secondary);
+    }
+    .workflow strong { color: var(--primary); }
+    .workflow ol { padding-left: 1.4rem; margin-top: .35rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <header class="page-header">
+      <h1>Site content editor</h1>
+      <p>Edit the text shown on the website. When you're done, click <strong>Save &amp; Download</strong> to get a new <code>site-data.json</code> file.</p>
+      <div class="workflow">
+        <strong>How it works</strong>
+        <ol>
+          <li>Edit the fields below.</li>
+          <li>Click <strong>Save &amp; Download</strong> — your browser downloads <code>site-data.json</code>.</li>
+          <li>Drop that file into the project folder (replacing the existing one) and commit it to publish the changes.</li>
+        </ol>
+      </div>
+      <div class="meta">
+        <span id="loadStatus" class="status">Loading…</span>
+        <span id="draftStatus" class="status" hidden></span>
+      </div>
+    </header>
+
+    <form id="adminForm" autocomplete="off">
+
+      <!-- ===== SITE / SEO ===== -->
+      <details open>
+        <summary>Site &amp; SEO</summary>
+        <div class="details-body">
+          <div class="field">
+            <label for="f_site_title">Browser tab title</label>
+            <input type="text" id="f_site_title" name="site.title">
+            <div class="hint">Shown in the browser tab and in search results.</div>
+          </div>
+          <div class="field">
+            <label for="f_site_description">Search-result description</label>
+            <textarea id="f_site_description" name="site.description"></textarea>
+            <div class="hint">A 1–2 sentence summary used by Google and when the page is shared.</div>
+          </div>
+          <div class="field">
+            <label for="f_site_logoAlt">Logo alt text</label>
+            <input type="text" id="f_site_logoAlt" name="site.logoAlt">
+            <div class="hint">For screen readers and when the logo image fails to load.</div>
+          </div>
+        </div>
+      </details>
+
+      <!-- ===== NAVIGATION ===== -->
+      <details>
+        <summary>Top navigation</summary>
+        <div class="details-body">
+          <div class="row-2">
+            <div class="field">
+              <label for="f_nav_services">"Services" link label</label>
+              <input type="text" id="f_nav_services" name="nav.linkServices">
+            </div>
+            <div class="field">
+              <label for="f_nav_about">"About" link label</label>
+              <input type="text" id="f_nav_about" name="nav.linkAbout">
+            </div>
+            <div class="field">
+              <label for="f_nav_process">"Process" link label</label>
+              <input type="text" id="f_nav_process" name="nav.linkProcess">
+            </div>
+            <div class="field">
+              <label for="f_nav_pricing">"Pricing" link label</label>
+              <input type="text" id="f_nav_pricing" name="nav.linkPricing">
+            </div>
+          </div>
+          <div class="field">
+            <label for="f_nav_cta">CTA button label (top right)</label>
+            <input type="text" id="f_nav_cta" name="nav.ctaLabel">
+          </div>
+        </div>
+      </details>
+
+      <!-- ===== HERO ===== -->
+      <details>
+        <summary>Hero (top of homepage)</summary>
+        <div class="details-body">
+          <div class="field">
+            <label for="f_hero_badge">Status badge text</label>
+            <input type="text" id="f_hero_badge" name="hero.badge">
+            <div class="hint">Small pill above the headline (e.g. "Accepting New Patients").</div>
+          </div>
+          <div class="row-2">
+            <div class="field">
+              <label for="f_hero_titleLead">Headline — text before the rotating word</label>
+              <input type="text" id="f_hero_titleLead" name="hero.titleLead">
+              <div class="hint">Include any trailing space (e.g. "Your doctor should know your ").</div>
+            </div>
+            <div class="field">
+              <label for="f_hero_titleTrail">Headline — text after the rotating word</label>
+              <input type="text" id="f_hero_titleTrail" name="hero.titleTrail">
+              <div class="hint">Usually just punctuation like ".".</div>
+            </div>
+          </div>
+          <div class="field">
+            <label for="f_hero_rotatingWords">Rotating words</label>
+            <textarea id="f_hero_rotatingWords" name="hero.rotatingWords" data-list="true"></textarea>
+            <div class="hint">One word or phrase per line. They cycle every few seconds in the headline.</div>
+          </div>
+          <div class="field">
+            <label for="f_hero_subtitle">Subtitle paragraph</label>
+            <textarea id="f_hero_subtitle" name="hero.subtitle" class="tall"></textarea>
+          </div>
+          <div class="row-2">
+            <div class="field">
+              <label for="f_hero_primaryCta">Primary button label</label>
+              <input type="text" id="f_hero_primaryCta" name="hero.primaryCta">
+            </div>
+            <div class="field">
+              <label for="f_hero_secondaryCta">Secondary button label</label>
+              <input type="text" id="f_hero_secondaryCta" name="hero.secondaryCta">
+            </div>
+          </div>
+
+          <fieldset>
+            <legend>Hero quote card</legend>
+            <div class="field">
+              <label for="f_hero_quote">Quote text</label>
+              <textarea id="f_hero_quote" name="hero.quote"></textarea>
+            </div>
+            <div class="row-2">
+              <div class="field">
+                <label for="f_hero_quoteName">Attribution name</label>
+                <input type="text" id="f_hero_quoteName" name="hero.quoteName">
+              </div>
+              <div class="field">
+                <label for="f_hero_quoteRole">Attribution role</label>
+                <input type="text" id="f_hero_quoteRole" name="hero.quoteRole">
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Stats bar (3 items)</legend>
+            <div class="row-2">
+              <div class="field">
+                <label for="f_hero_stat0_t">Stat 1 — title</label>
+                <input type="text" id="f_hero_stat0_t" name="hero.stats.0.title">
+              </div>
+              <div class="field">
+                <label for="f_hero_stat0_d">Stat 1 — description</label>
+                <input type="text" id="f_hero_stat0_d" name="hero.stats.0.description">
+              </div>
+              <div class="field">
+                <label for="f_hero_stat1_t">Stat 2 — title</label>
+                <input type="text" id="f_hero_stat1_t" name="hero.stats.1.title">
+              </div>
+              <div class="field">
+                <label for="f_hero_stat1_d">Stat 2 — description</label>
+                <input type="text" id="f_hero_stat1_d" name="hero.stats.1.description">
+              </div>
+              <div class="field">
+                <label for="f_hero_stat2_t">Stat 3 — title</label>
+                <input type="text" id="f_hero_stat2_t" name="hero.stats.2.title">
+              </div>
+              <div class="field">
+                <label for="f_hero_stat2_d">Stat 3 — description</label>
+                <input type="text" id="f_hero_stat2_d" name="hero.stats.2.description">
+              </div>
+            </div>
+          </fieldset>
+        </div>
+      </details>
+
+      <!-- ===== SERVICES ===== -->
+      <details>
+        <summary>Services section</summary>
+        <div class="details-body">
+          <div class="field">
+            <label for="f_services_label">Section eyebrow label</label>
+            <input type="text" id="f_services_label" name="services.label">
+          </div>
+          <div class="row-2">
+            <div class="field">
+              <label for="f_services_title1">Section title — line 1</label>
+              <input type="text" id="f_services_title1" name="services.titleLine1">
+            </div>
+            <div class="field">
+              <label for="f_services_title2">Section title — line 2</label>
+              <input type="text" id="f_services_title2" name="services.titleLine2">
+            </div>
+          </div>
+
+          <fieldset>
+            <legend>Service 1</legend>
+            <div class="row-2">
+              <div class="field">
+                <label for="f_svc0_name">Eyebrow / category name</label>
+                <input type="text" id="f_svc0_name" name="services.cards.0.name">
+              </div>
+              <div class="field">
+                <label for="f_svc0_heading">Heading</label>
+                <input type="text" id="f_svc0_heading" name="services.cards.0.heading">
+              </div>
+            </div>
+            <div class="field">
+              <label for="f_svc0_desc">Description paragraph</label>
+              <textarea id="f_svc0_desc" name="services.cards.0.description" class="tall"></textarea>
+            </div>
+            <div class="field">
+              <label for="f_svc0_items">Bullet points</label>
+              <textarea id="f_svc0_items" name="services.cards.0.items" data-list="true"></textarea>
+              <div class="hint">One item per line.</div>
+            </div>
+            <div class="field">
+              <label for="f_svc0_cta">CTA link label</label>
+              <input type="text" id="f_svc0_cta" name="services.cards.0.ctaLabel">
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Service 2</legend>
+            <div class="row-2">
+              <div class="field">
+                <label for="f_svc1_name">Eyebrow / category name</label>
+                <input type="text" id="f_svc1_name" name="services.cards.1.name">
+              </div>
+              <div class="field">
+                <label for="f_svc1_heading">Heading</label>
+                <input type="text" id="f_svc1_heading" name="services.cards.1.heading">
+              </div>
+            </div>
+            <div class="field">
+              <label for="f_svc1_desc">Description paragraph</label>
+              <textarea id="f_svc1_desc" name="services.cards.1.description" class="tall"></textarea>
+            </div>
+            <div class="field">
+              <label for="f_svc1_items">Bullet points</label>
+              <textarea id="f_svc1_items" name="services.cards.1.items" data-list="true"></textarea>
+              <div class="hint">One item per line.</div>
+            </div>
+            <div class="field">
+              <label for="f_svc1_cta">CTA link label</label>
+              <input type="text" id="f_svc1_cta" name="services.cards.1.ctaLabel">
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Service 3</legend>
+            <div class="row-2">
+              <div class="field">
+                <label for="f_svc2_name">Eyebrow / category name</label>
+                <input type="text" id="f_svc2_name" name="services.cards.2.name">
+              </div>
+              <div class="field">
+                <label for="f_svc2_heading">Heading</label>
+                <input type="text" id="f_svc2_heading" name="services.cards.2.heading">
+              </div>
+            </div>
+            <div class="field">
+              <label for="f_svc2_desc">Description paragraph</label>
+              <textarea id="f_svc2_desc" name="services.cards.2.description" class="tall"></textarea>
+            </div>
+            <div class="field">
+              <label for="f_svc2_items">Bullet points</label>
+              <textarea id="f_svc2_items" name="services.cards.2.items" data-list="true"></textarea>
+              <div class="hint">One item per line.</div>
+            </div>
+            <div class="field">
+              <label for="f_svc2_cta">CTA link label</label>
+              <input type="text" id="f_svc2_cta" name="services.cards.2.ctaLabel">
+            </div>
+          </fieldset>
+        </div>
+      </details>
+
+      <!-- ===== COMPARISON ===== -->
+      <details>
+        <summary>Comparison section ("The Difference")</summary>
+        <div class="details-body">
+          <div class="field">
+            <label for="f_cmp_label">Section eyebrow label</label>
+            <input type="text" id="f_cmp_label" name="comparison.label">
+          </div>
+          <div class="row-2">
+            <div class="field">
+              <label for="f_cmp_title1">Section title — line 1</label>
+              <input type="text" id="f_cmp_title1" name="comparison.titleLine1">
+            </div>
+            <div class="field">
+              <label for="f_cmp_title2">Section title — line 2</label>
+              <input type="text" id="f_cmp_title2" name="comparison.titleLine2">
+            </div>
+          </div>
+          <div class="field">
+            <label for="f_cmp_intro">Intro paragraph</label>
+            <textarea id="f_cmp_intro" name="comparison.intro"></textarea>
+          </div>
+
+          <fieldset>
+            <legend>"Them" column</legend>
+            <div class="field">
+              <label for="f_cmp_themLabel">Column label</label>
+              <input type="text" id="f_cmp_themLabel" name="comparison.themLabel">
+            </div>
+            <div class="field">
+              <label for="f_cmp_themItems">Items (5)</label>
+              <textarea id="f_cmp_themItems" name="comparison.themItems" data-list="true" class="tall"></textarea>
+              <div class="hint">One item per line. Keep this list at 5 items unless you also adjust the layout.</div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>"Us" column</legend>
+            <div class="field">
+              <label for="f_cmp_usLabel">Column label</label>
+              <input type="text" id="f_cmp_usLabel" name="comparison.usLabel">
+            </div>
+            <div class="field">
+              <label for="f_cmp_usItems">Items (5)</label>
+              <textarea id="f_cmp_usItems" name="comparison.usItems" data-list="true" class="tall"></textarea>
+              <div class="hint">One item per line. Keep this list at 5 items unless you also adjust the layout.</div>
+            </div>
+          </fieldset>
+        </div>
+      </details>
+
+      <!-- ===== ABOUT ===== -->
+      <details>
+        <summary>About / Meet Your Doctor</summary>
+        <div class="details-body">
+          <div class="field">
+            <label for="f_about_label">Section eyebrow label</label>
+            <input type="text" id="f_about_label" name="about.label">
+          </div>
+          <div class="field">
+            <label for="f_about_title">Heading</label>
+            <input type="text" id="f_about_title" name="about.title">
+          </div>
+          <div class="field">
+            <label for="f_about_p0">Paragraph 1</label>
+            <textarea id="f_about_p0" name="about.paragraphs.0" class="tall"></textarea>
+          </div>
+          <div class="field">
+            <label for="f_about_p1">Paragraph 2</label>
+            <textarea id="f_about_p1" name="about.paragraphs.1" class="tall"></textarea>
+          </div>
+          <div class="field">
+            <label for="f_about_p2">Paragraph 3</label>
+            <textarea id="f_about_p2" name="about.paragraphs.2" class="tall"></textarea>
+          </div>
+          <fieldset>
+            <legend>Credentials (3 chips)</legend>
+            <div class="row-2">
+              <div class="field">
+                <label for="f_about_cred0">Credential 1</label>
+                <input type="text" id="f_about_cred0" name="about.credentials.0">
+              </div>
+              <div class="field">
+                <label for="f_about_cred1">Credential 2</label>
+                <input type="text" id="f_about_cred1" name="about.credentials.1">
+              </div>
+              <div class="field">
+                <label for="f_about_cred2">Credential 3</label>
+                <input type="text" id="f_about_cred2" name="about.credentials.2">
+              </div>
+            </div>
+          </fieldset>
+        </div>
+      </details>
+
+      <!-- ===== PROCESS ===== -->
+      <details>
+        <summary>Process / How It Works</summary>
+        <div class="details-body">
+          <div class="field">
+            <label for="f_proc_label">Section eyebrow label</label>
+            <input type="text" id="f_proc_label" name="process.label">
+          </div>
+          <div class="row-2">
+            <div class="field">
+              <label for="f_proc_title1">Section title — line 1</label>
+              <input type="text" id="f_proc_title1" name="process.titleLine1">
+            </div>
+            <div class="field">
+              <label for="f_proc_title2">Section title — line 2</label>
+              <input type="text" id="f_proc_title2" name="process.titleLine2">
+            </div>
+          </div>
+
+          <fieldset>
+            <legend>Step 1</legend>
+            <div class="field"><label for="f_proc0_t">Title</label><input type="text" id="f_proc0_t" name="process.steps.0.title"></div>
+            <div class="field"><label for="f_proc0_d">Description</label><textarea id="f_proc0_d" name="process.steps.0.description"></textarea></div>
+          </fieldset>
+          <fieldset>
+            <legend>Step 2</legend>
+            <div class="field"><label for="f_proc1_t">Title</label><input type="text" id="f_proc1_t" name="process.steps.1.title"></div>
+            <div class="field"><label for="f_proc1_d">Description</label><textarea id="f_proc1_d" name="process.steps.1.description"></textarea></div>
+          </fieldset>
+          <fieldset>
+            <legend>Step 3</legend>
+            <div class="field"><label for="f_proc2_t">Title</label><input type="text" id="f_proc2_t" name="process.steps.2.title"></div>
+            <div class="field"><label for="f_proc2_d">Description</label><textarea id="f_proc2_d" name="process.steps.2.description"></textarea></div>
+          </fieldset>
+          <fieldset>
+            <legend>Step 4</legend>
+            <div class="field"><label for="f_proc3_t">Title</label><input type="text" id="f_proc3_t" name="process.steps.3.title"></div>
+            <div class="field"><label for="f_proc3_d">Description</label><textarea id="f_proc3_d" name="process.steps.3.description"></textarea></div>
+          </fieldset>
+        </div>
+      </details>
+
+      <!-- ===== PRICING ===== -->
+      <details>
+        <summary>Pricing section</summary>
+        <div class="details-body">
+          <div class="field">
+            <label for="f_price_label">Section eyebrow label</label>
+            <input type="text" id="f_price_label" name="pricing.label">
+          </div>
+          <div class="field">
+            <label for="f_price_title">Section title</label>
+            <input type="text" id="f_price_title" name="pricing.title">
+          </div>
+          <div class="field">
+            <label for="f_price_subtitle">Section subtitle</label>
+            <input type="text" id="f_price_subtitle" name="pricing.subtitle">
+          </div>
+          <div class="field">
+            <label for="f_price_badge">"Most Popular" badge text</label>
+            <input type="text" id="f_price_badge" name="pricing.featuredBadge">
+            <div class="hint">Shown on whichever card is marked Featured below.</div>
+          </div>
+          <div class="field">
+            <label for="f_price_note">Footer note (under the cards)</label>
+            <textarea id="f_price_note" name="pricing.note"></textarea>
+          </div>
+
+          <fieldset>
+            <legend>Pricing card 1</legend>
+            <div class="row-2">
+              <div class="field"><label for="f_pc0_tag">Eyebrow tag</label><input type="text" id="f_pc0_tag" name="pricing.cards.0.tag"></div>
+              <div class="field"><label for="f_pc0_heading">Heading</label><input type="text" id="f_pc0_heading" name="pricing.cards.0.heading"></div>
+            </div>
+            <div class="row-2">
+              <div class="field">
+                <label for="f_pc0_priceNumber">Price number</label>
+                <input type="text" id="f_pc0_priceNumber" name="pricing.cards.0.priceNumber">
+                <div class="hint">e.g. "$299". Leave blank to show the text label below instead.</div>
+              </div>
+              <div class="field">
+                <label for="f_pc0_pricePeriod">Price period</label>
+                <input type="text" id="f_pc0_pricePeriod" name="pricing.cards.0.pricePeriod">
+                <div class="hint">e.g. "/month".</div>
+              </div>
+            </div>
+            <div class="field">
+              <label for="f_pc0_priceLabel">Or — text label (when there's no price number)</label>
+              <input type="text" id="f_pc0_priceLabel" name="pricing.cards.0.priceLabel">
+              <div class="hint">e.g. "Custom Quote", "Contact for Pricing".</div>
+            </div>
+            <div class="field"><label for="f_pc0_desc">Description</label><textarea id="f_pc0_desc" name="pricing.cards.0.description"></textarea></div>
+            <div class="field">
+              <label for="f_pc0_items">Bullet points</label>
+              <textarea id="f_pc0_items" name="pricing.cards.0.items" data-list="true"></textarea>
+              <div class="hint">One item per line.</div>
+            </div>
+            <div class="field"><label for="f_pc0_cta">CTA button label</label><input type="text" id="f_pc0_cta" name="pricing.cards.0.ctaLabel"></div>
+            <label class="check"><input type="checkbox" name="pricing.cards.0.featured"> Mark this card as Featured ("Most Popular")</label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Pricing card 2</legend>
+            <div class="row-2">
+              <div class="field"><label for="f_pc1_tag">Eyebrow tag</label><input type="text" id="f_pc1_tag" name="pricing.cards.1.tag"></div>
+              <div class="field"><label for="f_pc1_heading">Heading</label><input type="text" id="f_pc1_heading" name="pricing.cards.1.heading"></div>
+            </div>
+            <div class="row-2">
+              <div class="field">
+                <label for="f_pc1_priceNumber">Price number</label>
+                <input type="text" id="f_pc1_priceNumber" name="pricing.cards.1.priceNumber">
+              </div>
+              <div class="field">
+                <label for="f_pc1_pricePeriod">Price period</label>
+                <input type="text" id="f_pc1_pricePeriod" name="pricing.cards.1.pricePeriod">
+              </div>
+            </div>
+            <div class="field">
+              <label for="f_pc1_priceLabel">Or — text label</label>
+              <input type="text" id="f_pc1_priceLabel" name="pricing.cards.1.priceLabel">
+            </div>
+            <div class="field"><label for="f_pc1_desc">Description</label><textarea id="f_pc1_desc" name="pricing.cards.1.description"></textarea></div>
+            <div class="field">
+              <label for="f_pc1_items">Bullet points</label>
+              <textarea id="f_pc1_items" name="pricing.cards.1.items" data-list="true"></textarea>
+              <div class="hint">One item per line.</div>
+            </div>
+            <div class="field"><label for="f_pc1_cta">CTA button label</label><input type="text" id="f_pc1_cta" name="pricing.cards.1.ctaLabel"></div>
+            <label class="check"><input type="checkbox" name="pricing.cards.1.featured"> Mark this card as Featured ("Most Popular")</label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Pricing card 3</legend>
+            <div class="row-2">
+              <div class="field"><label for="f_pc2_tag">Eyebrow tag</label><input type="text" id="f_pc2_tag" name="pricing.cards.2.tag"></div>
+              <div class="field"><label for="f_pc2_heading">Heading</label><input type="text" id="f_pc2_heading" name="pricing.cards.2.heading"></div>
+            </div>
+            <div class="row-2">
+              <div class="field">
+                <label for="f_pc2_priceNumber">Price number</label>
+                <input type="text" id="f_pc2_priceNumber" name="pricing.cards.2.priceNumber">
+              </div>
+              <div class="field">
+                <label for="f_pc2_pricePeriod">Price period</label>
+                <input type="text" id="f_pc2_pricePeriod" name="pricing.cards.2.pricePeriod">
+              </div>
+            </div>
+            <div class="field">
+              <label for="f_pc2_priceLabel">Or — text label</label>
+              <input type="text" id="f_pc2_priceLabel" name="pricing.cards.2.priceLabel">
+            </div>
+            <div class="field"><label for="f_pc2_desc">Description</label><textarea id="f_pc2_desc" name="pricing.cards.2.description"></textarea></div>
+            <div class="field">
+              <label for="f_pc2_items">Bullet points</label>
+              <textarea id="f_pc2_items" name="pricing.cards.2.items" data-list="true"></textarea>
+              <div class="hint">One item per line.</div>
+            </div>
+            <div class="field"><label for="f_pc2_cta">CTA button label</label><input type="text" id="f_pc2_cta" name="pricing.cards.2.ctaLabel"></div>
+            <label class="check"><input type="checkbox" name="pricing.cards.2.featured"> Mark this card as Featured ("Most Popular")</label>
+          </fieldset>
+        </div>
+      </details>
+
+      <!-- ===== CONTACT ===== -->
+      <details>
+        <summary>Contact section</summary>
+        <div class="details-body">
+          <div class="field">
+            <label for="f_contact_label">Section eyebrow label</label>
+            <input type="text" id="f_contact_label" name="contact.label">
+          </div>
+          <div class="row-2">
+            <div class="field">
+              <label for="f_contact_title1">Section title — line 1</label>
+              <input type="text" id="f_contact_title1" name="contact.titleLine1">
+            </div>
+            <div class="field">
+              <label for="f_contact_title2">Section title — line 2</label>
+              <input type="text" id="f_contact_title2" name="contact.titleLine2">
+            </div>
+          </div>
+          <div class="field">
+            <label for="f_contact_intro">Intro paragraph</label>
+            <textarea id="f_contact_intro" name="contact.intro" class="tall"></textarea>
+          </div>
+
+          <fieldset>
+            <legend>Contact methods</legend>
+            <div class="row-2">
+              <div class="field"><label for="f_cm0_t">Method 1 — title</label><input type="text" id="f_cm0_t" name="contact.methods.0.title"></div>
+              <div class="field"><label for="f_cm0_d">Method 1 — description</label><input type="text" id="f_cm0_d" name="contact.methods.0.description"></div>
+              <div class="field"><label for="f_cm1_t">Method 2 — title</label><input type="text" id="f_cm1_t" name="contact.methods.1.title"></div>
+              <div class="field"><label for="f_cm1_d">Method 2 — description</label><input type="text" id="f_cm1_d" name="contact.methods.1.description"></div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Contact form labels</legend>
+            <div class="row-2">
+              <div class="field"><label for="f_cf_nameLabel">"Full Name" label</label><input type="text" id="f_cf_nameLabel" name="contact.form.nameLabel"></div>
+              <div class="field"><label for="f_cf_namePlaceholder">"Full Name" placeholder</label><input type="text" id="f_cf_namePlaceholder" name="contact.form.namePlaceholder"></div>
+              <div class="field"><label for="f_cf_emailLabel">"Email" label</label><input type="text" id="f_cf_emailLabel" name="contact.form.emailLabel"></div>
+              <div class="field"><label for="f_cf_emailPlaceholder">"Email" placeholder</label><input type="text" id="f_cf_emailPlaceholder" name="contact.form.emailPlaceholder"></div>
+              <div class="field"><label for="f_cf_phoneLabel">"Phone" label</label><input type="text" id="f_cf_phoneLabel" name="contact.form.phoneLabel"></div>
+              <div class="field"><label for="f_cf_phonePlaceholder">"Phone" placeholder</label><input type="text" id="f_cf_phonePlaceholder" name="contact.form.phonePlaceholder"></div>
+            </div>
+            <div class="field"><label for="f_cf_interestsLabel">"Interests" group label</label><input type="text" id="f_cf_interestsLabel" name="contact.form.interestsLabel"></div>
+            <div class="row-2">
+              <div class="field"><label for="f_cf_interestHair">Interest chip — Hair</label><input type="text" id="f_cf_interestHair" name="contact.form.interestHair"></div>
+              <div class="field"><label for="f_cf_interestWeight">Interest chip — Weight</label><input type="text" id="f_cf_interestWeight" name="contact.form.interestWeight"></div>
+              <div class="field"><label for="f_cf_interestHrt">Interest chip — HRT</label><input type="text" id="f_cf_interestHrt" name="contact.form.interestHrt"></div>
+            </div>
+            <div class="row-2">
+              <div class="field"><label for="f_cf_messageLabel">"Message" label</label><input type="text" id="f_cf_messageLabel" name="contact.form.messageLabel"></div>
+              <div class="field"><label for="f_cf_messagePlaceholder">"Message" placeholder</label><input type="text" id="f_cf_messagePlaceholder" name="contact.form.messagePlaceholder"></div>
+            </div>
+            <div class="row-2">
+              <div class="field"><label for="f_cf_submitLabel">Submit button label</label><input type="text" id="f_cf_submitLabel" name="contact.form.submitLabel"></div>
+              <div class="field"><label for="f_cf_note">Form note</label><input type="text" id="f_cf_note" name="contact.form.note"></div>
+            </div>
+            <div class="field"><label for="f_cf_successTitle">Success message title</label><input type="text" id="f_cf_successTitle" name="contact.form.successTitle"></div>
+            <div class="field"><label for="f_cf_successMessage">Success message body</label><textarea id="f_cf_successMessage" name="contact.form.successMessage"></textarea></div>
+          </fieldset>
+        </div>
+      </details>
+
+      <!-- ===== FOOTER ===== -->
+      <details>
+        <summary>Footer</summary>
+        <div class="details-body">
+          <div class="field">
+            <label for="f_footer_tagline">Footer tagline</label>
+            <input type="text" id="f_footer_tagline" name="footer.tagline">
+          </div>
+          <div class="row-2">
+            <div class="field"><label for="f_footer_servicesHeading">"Services" column heading</label><input type="text" id="f_footer_servicesHeading" name="footer.servicesHeading"></div>
+            <div class="field"><label for="f_footer_companyHeading">"Company" column heading</label><input type="text" id="f_footer_companyHeading" name="footer.companyHeading"></div>
+          </div>
+
+          <fieldset>
+            <legend>Services column links</legend>
+            <div class="row-2">
+              <div class="field"><label for="f_fsv0">Link 1 label</label><input type="text" id="f_fsv0" name="footer.servicesLinks.0.label"></div>
+              <div class="field"><label for="f_fsv1">Link 2 label</label><input type="text" id="f_fsv1" name="footer.servicesLinks.1.label"></div>
+              <div class="field"><label for="f_fsv2">Link 3 label</label><input type="text" id="f_fsv2" name="footer.servicesLinks.2.label"></div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Company column links</legend>
+            <div class="row-2">
+              <div class="field"><label for="f_fco0">Link 1 label</label><input type="text" id="f_fco0" name="footer.companyLinks.0.label"></div>
+              <div class="field"><label for="f_fco1">Link 2 label</label><input type="text" id="f_fco1" name="footer.companyLinks.1.label"></div>
+              <div class="field"><label for="f_fco2">Link 3 label</label><input type="text" id="f_fco2" name="footer.companyLinks.2.label"></div>
+              <div class="field"><label for="f_fco3">Link 4 label</label><input type="text" id="f_fco3" name="footer.companyLinks.3.label"></div>
+            </div>
+          </fieldset>
+
+          <div class="field">
+            <label for="f_footer_copyright">Copyright line</label>
+            <input type="text" id="f_footer_copyright" name="footer.copyright">
+          </div>
+          <div class="field">
+            <label for="f_footer_disclaimer">Disclaimer</label>
+            <textarea id="f_footer_disclaimer" name="footer.disclaimer" class="tall"></textarea>
+          </div>
+        </div>
+      </details>
+
+    </form>
+
+    <div class="actions">
+      <button form="adminForm" type="submit" class="btn btn-primary">Save &amp; Download</button>
+      <button id="reloadBtn" type="button" class="btn btn-ghost">Reload from site-data.json</button>
+      <span class="spacer"></span>
+      <button id="clearDraftBtn" type="button" class="btn btn-danger">Clear local draft</button>
+    </div>
+
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const SITE_DATA_URL = 'site-data.json';
+    const LOCAL_DRAFT_KEY = 'siteData.draft';
+
+    const form         = document.getElementById('adminForm');
+    const loadStatus   = document.getElementById('loadStatus');
+    const draftStatus  = document.getElementById('draftStatus');
+    const reloadBtn    = document.getElementById('reloadBtn');
+    const clearDraftBtn = document.getElementById('clearDraftBtn');
+    const toast        = document.getElementById('toast');
+
+    function showToast(msg, ms = 2400) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => toast.classList.remove('show'), ms);
+    }
+
+    function setStatus(el, text, kind) {
+      el.hidden = false;
+      el.textContent = text;
+      el.classList.remove('ok', 'warn');
+      if (kind) el.classList.add(kind);
+    }
+
+    function getByPath(obj, path) {
+      if (obj == null) return undefined;
+      return path.split('.').reduce((acc, k) => (acc == null ? undefined : acc[k]), obj);
+    }
+
+    // setByPath supports numeric segments — they create arrays instead of plain objects.
+    function setByPath(obj, path, value) {
+      const parts = path.split('.');
+      let cursor = obj;
+      for (let i = 0; i < parts.length - 1; i++) {
+        const key = parts[i];
+        const nextKey = parts[i + 1];
+        const nextIsIndex = /^\d+$/.test(nextKey);
+        if (cursor[key] == null) {
+          cursor[key] = nextIsIndex ? [] : {};
+        }
+        cursor = cursor[key];
+      }
+      cursor[parts[parts.length - 1]] = value;
+    }
+
+    // ---------- Populate the form from a data object ----------
+    function populateForm(data) {
+      const fields = form.querySelectorAll('[name]');
+      fields.forEach(el => {
+        const path = el.getAttribute('name');
+        const value = getByPath(data, path);
+        if (el.type === 'checkbox') {
+          el.checked = !!value;
+        } else if (el.dataset.list === 'true') {
+          el.value = Array.isArray(value) ? value.join('\n') : '';
+        } else {
+          el.value = value == null ? '' : String(value);
+        }
+      });
+    }
+
+    // ---------- Build a data object from the form's current state ----------
+    function collectForm() {
+      const out = {};
+      const fields = form.querySelectorAll('[name]');
+      fields.forEach(el => {
+        const path = el.getAttribute('name');
+        let value;
+        if (el.type === 'checkbox') {
+          value = el.checked;
+        } else if (el.dataset.list === 'true') {
+          value = el.value
+            .split(/\r?\n/)
+            .map(s => s.trim())
+            .filter(s => s.length > 0);
+        } else {
+          value = el.value;
+        }
+        setByPath(out, path, value);
+      });
+      return out;
+    }
+
+    // ---------- Loading ----------
+    async function loadFromServer() {
+      try {
+        const res = await fetch(SITE_DATA_URL, { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        populateForm(data);
+        setStatus(loadStatus, 'Loaded site-data.json', 'ok');
+        return data;
+      } catch (err) {
+        setStatus(loadStatus, 'Could not load site-data.json (' + err.message + ')', 'warn');
+        return null;
+      }
+    }
+
+    function loadDraft() {
+      try {
+        const raw = localStorage.getItem(LOCAL_DRAFT_KEY);
+        if (!raw) return null;
+        const data = JSON.parse(raw);
+        return data;
+      } catch (_) {
+        return null;
+      }
+    }
+
+    function saveDraft(data) {
+      try {
+        localStorage.setItem(LOCAL_DRAFT_KEY, JSON.stringify(data));
+      } catch (_) { /* quota — ignore */ }
+    }
+
+    function refreshDraftStatus() {
+      const has = !!localStorage.getItem(LOCAL_DRAFT_KEY);
+      if (has) setStatus(draftStatus, 'Unsaved draft in this browser', 'warn');
+      else { draftStatus.hidden = true; }
+    }
+
+    // ---------- Submit → build + download JSON ----------
+    function downloadJSON(data) {
+      const text = JSON.stringify(data, null, 2) + '\n';
+      const blob = new Blob([text], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'site-data.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const data = collectForm();
+      saveDraft(data);
+      refreshDraftStatus();
+      downloadJSON(data);
+      showToast('site-data.json downloaded — drop it into the project folder to publish.');
+    });
+
+    reloadBtn.addEventListener('click', async () => {
+      if (localStorage.getItem(LOCAL_DRAFT_KEY)) {
+        const ok = confirm('This will discard your in-browser draft and reload from site-data.json. Continue?');
+        if (!ok) return;
+        localStorage.removeItem(LOCAL_DRAFT_KEY);
+        refreshDraftStatus();
+      }
+      await loadFromServer();
+      showToast('Reloaded from site-data.json');
+    });
+
+    clearDraftBtn.addEventListener('click', () => {
+      if (!localStorage.getItem(LOCAL_DRAFT_KEY)) {
+        showToast('No draft to clear');
+        return;
+      }
+      const ok = confirm('Clear the in-browser draft? The form will reload from site-data.json.');
+      if (!ok) return;
+      localStorage.removeItem(LOCAL_DRAFT_KEY);
+      refreshDraftStatus();
+      loadFromServer().then(() => showToast('Draft cleared'));
+    });
+
+    // Persist a draft on every input change so the editor survives a refresh.
+    form.addEventListener('input', () => {
+      saveDraft(collectForm());
+      refreshDraftStatus();
+    });
+
+    // ---------- Boot ----------
+    (async function init() {
+      const draft = loadDraft();
+      const fileData = await loadFromServer();
+      if (draft) {
+        populateForm(draft);
+        setStatus(draftStatus, 'Loaded unsaved draft from this browser', 'warn');
+      } else if (!fileData) {
+        // Nothing to load — leave form empty.
+      }
+      refreshDraftStatus();
+    })();
+  </script>
+
+</body>
+</html>
