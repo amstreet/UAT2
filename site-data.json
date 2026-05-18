@@ -208,16 +208,6 @@
     "titleLine1": "Ready to take",
     "titleLine2": "the first step?",
     "intro": "Send Dr. Ehrlich a message and he'll personally follow up with you. Whether you have questions about a specific treatment or just want to explore your options, he's here to help.",
-    "methods": [
-      {
-        "title": "",
-        "description": ""
-      },
-      {
-        "title": "",
-        "description": ""
-      }
-    ],
     "form": {
       "nameLabel": "Full Name",
       "namePlaceholder": "Your name",
