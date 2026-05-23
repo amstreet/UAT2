@@ -1,0 +1,32 @@
+name: Deploy to Firebase Hosting (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Optional note for the deploy log"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: firebase-hosting-deploy-live
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to live channel
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to Firebase Hosting (live)
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TIMOTHYEHRLICHMD }}
+          channelId: live
+          projectId: timothyehrlichmd
