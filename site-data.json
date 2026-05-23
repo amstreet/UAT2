@@ -24,9 +24,8 @@
     "subtitle": "Dr. Timothy Ehrlich provides personalized treatment for hair restoration, weight management, and hormone therapy — with direct access to your doctor, not a call center.",
     "primaryCta": "Start Your Journey",
     "secondaryCta": "View Services",
-    "quote": "I give every patient my personal number. When you have a question at 9pm, you reach me — not a chatbot.",
-    "quoteName": "Dr. Timothy Ehrlich",
-    "quoteRole": "Hair Restoration Surgeon & Wellness Physician",
+    "featureHeadline": "Concierge medical wellness for busy, active patients.",
+    "featureText": "Personalized, physician-led care for people who want to look better, feel stronger, and build a healthier lifestyle through proven medical treatments for weight management, hormone optimization, and hair restoration.",
     "stats": [
       {
         "title": "Direct Line",
@@ -37,7 +36,7 @@
         "description": "Proactive follow-ups"
       },
       {
-        "title": "Board Certified",
+        "title": "30 years of experience",
         "description": "Physician-led care"
       }
     ]
@@ -48,11 +47,10 @@
     "titleLine2": "One dedicated physician.",
     "cards": [
       {
-        "name": "Hair Loss  Prevention and Restoration",
-        "heading": "Prescription Treatments for Prevention or Follicle Transplant Surgery",
-        "description": "Get ahead of hair loss with medication prescribed and monitored by Dr. Ehrlich.\n\nRestore your hair with proven surgical techniques, guided by a physician who stays with you from consultation through recovery. Dr. Ehrlich personally performs each procedure and follows up to ensure optimal results.",
+        "name": "Hair Loss Restoration",
+        "heading": "Hair Transplant Surgery",
+        "description": "Restore your hair with proven surgical techniques, guided by a physician who stays with you from consultation through recovery. Dr. Ehrlich personally performs each procedure and follows up to ensure optimal results.",
         "items": [
-          "Personalized hair loss prevention prescriptions",
           "Personalized surgical consultation",
           "Physician-performed procedure",
           "Ongoing post-op follow-ups",
@@ -97,14 +95,14 @@
       "Support tickets & chat bots",
       "Follow-ups only if you request",
       "Generic protocols",
-      "Wait until business hours"
+      "Limited business hours"
     ],
     "usLabel": "Dr. Ehrlich",
     "usItems": [
       "Your dedicated physician",
       "Direct text or call",
       "Scheduled monthly check-ins",
-      "Personalized to your labs & progress",
+      "Treatment personalized for your needs and progress",
       "Dr. Ehrlich responds personally"
     ]
   },
@@ -113,13 +111,8 @@
     "title": "Dr. Timothy Ehrlich",
     "paragraphs": [
       "Dr. Timothy Ehrlich began his medical career as a general and advanced laparoscopic surgeon, spending the majority of his early years in practice as a bariatric surgeon. That work demanded technical precision under pressure and a deep understanding of patient physiology, anatomy, and long-term outcomes. The surgical foundation he built during that period — operative judgment, fine motor skill, and a results-driven mindset — continues to shape every procedure he performs today.",
-      "After years in high-acuity surgery, Dr. Ehrlich transitioned into hair restoration, a field that allowed him to apply his surgical expertise to elective, life-improving work rather than emergency care. He has now performed more than 4,000 hair transplant procedures, giving him a depth of experience that few practitioners in the field can match. Each case is approached with the same standards of planning, sterility, and craftsmanship he developed in the operating room, with a focus on natural-looking, durable results.",
+      "After years in high-acuity surgery, Dr. Ehrlich transitioned into hair restoration, a field that allowed him to apply his surgical expertise to elective, life-improving work rather than emergency care. He has now performed more than 4,000 hair transplant procedures, giving him a depth of experience that few practitioners in the field can match. Each case is approached with the same standards of planning and craftsmanship he developed in the operating room, with a focus on natural-looking, durable results.",
       "His approach is simple: treat every patient the way he'd want to be treated. That means honest conversations, individualized treatment plans, and a physician who genuinely cares about your outcomes."
-    ],
-    "credentials": [
-      "Hair Restoration Surgeon & Wellness Physician",
-      "Direct Patient Access",
-      "Proactive Follow-ups"
     ]
   },
   "process": {
@@ -141,7 +134,7 @@
       },
       {
         "title": "Ongoing Care",
-        "description": "Monthly check-ins, quarterly reviews, and direct access to Dr. Ehrlich whenever you need it. Your care doesn't stop at the prescription."
+        "description": "Monthly check-ins, quarterly reviews, and direct access to Dr. Ehrlich whenever you need it."
       }
     ]
   },
@@ -150,23 +143,21 @@
     "title": "Transparent, straightforward pricing.",
     "subtitle": "No hidden fees. No surprise charges. Just honest care.",
     "featuredBadge": "Most Popular",
-    "note": "Payment accepted via Zelle and Venmo. Additional payment options available upon request.",
     "cards": [
       {
-        "tag": "Hair Loss Prevention and Restoration",
-        "heading": "Prescription Treatments for Prevention or Follicle Transplant Surgery",
+        "tag": "Hair Loss Restoration",
+        "heading": "Hair Transplant Surgery",
         "priceNumber": "",
         "pricePeriod": "",
         "priceLabel": "Custom Quote",
         "description": "Pricing varies based on treatment type and scope. Schedule a consultation for a personalized quote.",
         "items": [
-          "Personalized hair loss prevention prescriptions",
           "Personal surgical consultation",
           "Physician-performed procedure",
           "Post-op follow-up included",
           "Direct access to Dr. Ehrlich"
         ],
-        "ctaLabel": "Get a Quote",
+        "ctaLabel": "Schedule a Consultation",
         "featured": false
       },
       {
@@ -180,7 +171,7 @@
           "GLP-1 medication prescribed",
           "Monthly physician check-ins",
           "90-day dosage reviews",
-          "Direct line to Dr. Ehrlich"
+          "Direct access to Dr. Ehrlich"
         ],
         "ctaLabel": "Get Started",
         "featured": true
@@ -216,7 +207,7 @@
       "phoneLabel": "Phone (optional)",
       "phonePlaceholder": "(555) 123-4567",
       "interestsLabel": "I'm interested in:",
-      "interestHair": "Hair Loss Prevention and Restoration",
+      "interestHair": "Hair Loss Restoration",
       "interestWeight": "Weight Management",
       "interestHrt": "Testosterone Replacement",
       "messageLabel": "Message (optional)",
@@ -228,12 +219,12 @@
     }
   },
   "footer": {
-    "tagline": "Physician-led care for hair, weight, and hormones.",
+    "tagline": "Physician-led care for hair restoration, weight loss, and hormone replacement therapy.",
     "servicesHeading": "Services",
     "companyHeading": "Company",
     "servicesLinks": [
       {
-        "label": "Hair Loss Prevention and Restoration"
+        "label": "Hair Loss Restoration"
       },
       {
         "label": "Weight Management"

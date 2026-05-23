@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ---------- Scroll reveal animations ----------
   const revealElements = document.querySelectorAll(
-    '.service-card, .timeline-step, .pricing-card, .comp-card, .about-layout, .contact-layout, .hero-quote-card, .hero-stats'
+    '.service-card, .timeline-step, .pricing-card, .comp-card, .about-layout, .contact-layout, .hero-feature-card, .hero-stats'
   );
 
   revealElements.forEach(el => el.classList.add('reveal'));

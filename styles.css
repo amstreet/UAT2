@@ -382,67 +382,41 @@ input, textarea, button {
   flex-wrap: wrap;
 }
 
-/* Hero Quote Card */
-.hero-quote-card {
+/* Hero Feature Card */
+.hero-feature-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border-light);
-  padding: var(--space-2xl) var(--space-2xl) var(--space-xl);
+  padding: var(--space-2xl);
   border-radius: var(--radius-lg);
   position: relative;
   box-shadow: 0 20px 60px rgba(15, 63, 102, 0.06);
 }
 
-.quote-mark {
-  font-family: var(--font-heading);
-  font-size: 4rem;
-  line-height: 1;
-  color: var(--color-accent);
-  opacity: 0.4;
+.hero-feature-card::before {
+  content: '';
   position: absolute;
-  top: 16px;
-  left: 24px;
+  top: 0;
+  left: var(--space-2xl);
+  width: 36px;
+  height: 3px;
+  background: var(--color-accent);
+  border-radius: 0 0 2px 2px;
 }
 
-.hero-quote-card blockquote {
+.hero-feature-headline {
   font-family: var(--font-heading);
-  font-size: 1.25rem;
-  font-weight: 400;
-  line-height: 1.6;
+  font-size: 1.55rem;
+  font-weight: 500;
+  line-height: 1.25;
   color: var(--color-primary);
-  font-style: italic;
-  margin-bottom: var(--space-xl);
-  padding-top: var(--space-lg);
+  letter-spacing: -0.01em;
+  margin-bottom: var(--space-md);
 }
 
-.quote-author {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-  padding-top: var(--space-lg);
-  border-top: 1px solid var(--color-border-light);
-}
-
-.quote-avatar {
-  width: 44px;
-  height: 44px;
-  background: var(--color-bg-alt);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-primary);
-}
-
-.quote-name {
-  display: block;
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: var(--color-primary);
-}
-
-.quote-role {
-  font-size: 0.78rem;
-  color: var(--color-text-muted);
+.hero-feature-text {
+  font-size: 0.98rem;
+  line-height: 1.7;
+  color: var(--color-text-secondary);
 }
 
 /* Hero Stats Bar */
@@ -756,35 +730,6 @@ input, textarea, button {
   margin-bottom: var(--space-lg);
 }
 
-.about-credentials {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-lg);
-  margin-top: var(--space-2xl);
-  padding-top: var(--space-xl);
-  border-top: 1px solid var(--color-border-light);
-}
-
-.credential {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--color-primary);
-}
-
-.credential-icon {
-  width: 36px;
-  height: 36px;
-  background: var(--color-accent-subtle);
-  border-radius: var(--radius);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-accent);
-}
-
 /* ---------- Process / Timeline ---------- */
 .process {
   padding: var(--space-5xl) 0;
@@ -1002,17 +947,6 @@ input, textarea, button {
   height: 6px;
   border-radius: 50%;
   background: var(--color-accent);
-}
-
-.pricing-note {
-  text-align: center;
-  font-size: 0.82rem;
-  color: var(--color-text-muted);
-  margin-top: var(--space-2xl);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-sm);
 }
 
 /* ---------- Contact ---------- */
@@ -1287,7 +1221,7 @@ input, textarea, button {
     gap: var(--space-3xl);
   }
 
-  .hero-quote-card {
+  .hero-feature-card {
     max-width: 520px;
   }
 
@@ -1415,10 +1349,6 @@ input, textarea, button {
   }
 
   .interest-chips {
-    flex-direction: column;
-  }
-
-  .about-credentials {
     flex-direction: column;
   }
 }

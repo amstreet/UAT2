@@ -300,20 +300,14 @@
           </div>
 
           <fieldset>
-            <legend>Hero quote card</legend>
+            <legend>Hero feature card</legend>
             <div class="field">
-              <label for="f_hero_quote">Quote text</label>
-              <textarea id="f_hero_quote" name="hero.quote"></textarea>
+              <label for="f_hero_featureHeadline">Headline</label>
+              <input type="text" id="f_hero_featureHeadline" name="hero.featureHeadline">
             </div>
-            <div class="row-2">
-              <div class="field">
-                <label for="f_hero_quoteName">Attribution name</label>
-                <input type="text" id="f_hero_quoteName" name="hero.quoteName">
-              </div>
-              <div class="field">
-                <label for="f_hero_quoteRole">Attribution role</label>
-                <input type="text" id="f_hero_quoteRole" name="hero.quoteRole">
-              </div>
+            <div class="field">
+              <label for="f_hero_featureText">Description</label>
+              <textarea id="f_hero_featureText" name="hero.featureText" class="tall"></textarea>
             </div>
           </fieldset>
 
@@ -526,23 +520,6 @@
             <label for="f_about_p2">Paragraph 3</label>
             <textarea id="f_about_p2" name="about.paragraphs.2" class="tall"></textarea>
           </div>
-          <fieldset>
-            <legend>Credentials (3 chips)</legend>
-            <div class="row-2">
-              <div class="field">
-                <label for="f_about_cred0">Credential 1</label>
-                <input type="text" id="f_about_cred0" name="about.credentials.0">
-              </div>
-              <div class="field">
-                <label for="f_about_cred1">Credential 2</label>
-                <input type="text" id="f_about_cred1" name="about.credentials.1">
-              </div>
-              <div class="field">
-                <label for="f_about_cred2">Credential 3</label>
-                <input type="text" id="f_about_cred2" name="about.credentials.2">
-              </div>
-            </div>
-          </fieldset>
         </div>
       </details>
 
@@ -608,10 +585,6 @@
             <label for="f_price_badge">"Most Popular" badge text</label>
             <input type="text" id="f_price_badge" name="pricing.featuredBadge">
             <div class="hint">Shown on whichever card is marked Featured below.</div>
-          </div>
-          <div class="field">
-            <label for="f_price_note">Footer note (under the cards)</label>
-            <textarea id="f_price_note" name="pricing.note"></textarea>
           </div>
 
           <fieldset>
