@@ -23,7 +23,9 @@ const RESEND_API_KEY = defineSecret('RESEND_API_KEY');
 
 // Where the notification email gets sent. Not a secret — change in code if
 // it needs to move (e.g. to a practice inbox once Workspace is set up).
-const DESTINATION_EMAIL = 'Tbehrlichmd@gmail.com';
+// TEMPORARY: test inbox for internal reply-to testing. Change back to
+// Tbehrlichmd@gmail.com before going live.
+const DESTINATION_EMAIL = 'connoly252@me.com';
 
 // The From address shown to Dr. Ehrlich. Must be on a domain verified in
 // Resend. Until the domain is verified, change this to the Resend
@@ -154,8 +156,10 @@ exports.submitLead = onRequest(
           from: FROM_EMAIL,
           to: DESTINATION_EMAIL,
           // Set reply-to so Dr. Ehrlich can reply straight to the patient.
-          // Different Resend SDK versions accept replyTo (camelCase) vs
-          // reply_to (snake_case); set both so whichever is honored wins.
+          // Verified: resend 4.8.0 (pinned in package-lock.json) reads the
+          // camelCase `replyTo` and maps it to the API's `reply_to`. The
+          // snake_case key below is ignored by this version but kept as a
+          // harmless guard in case the pinned version ever changes.
           replyTo: email,
           reply_to: email,
           subject,
