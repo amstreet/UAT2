@@ -5,11 +5,16 @@ Read this first.
 
 ## 1. What this is
 
-A marketing site + patient intake wizard for **Timothy B. Ehrlich, MD** — a
-private wellness practice offering hair loss prevention/restoration, weight
-management (GLP-1), and testosterone replacement therapy. Hosted on **Firebase
-Hosting** in the project `timothyehrlichmd`, deployed from this GitHub repo
-(`amstreet/UAT2`).
+A marketing site + lead-capture contact form for **Timothy B. Ehrlich, MD** —
+a private wellness practice offering hair loss restoration (transplant
+surgery), weight management (GLP-1), and testosterone replacement therapy.
+Hosted on **Firebase Hosting** in the project `timothyehrlichmd`, with a
+Cloud Function (`submitLead`) that writes contact submissions to Firestore
+and notifies Dr. Ehrlich via Resend.
+
+**Important scope note:** the form is **contact-information only** (name,
+phone, email, service interest). It does **not** collect PHI — that was an
+explicit scoping decision. See [§10 HIPAA / scope rationale](#10-hipaa--scope-rationale).
 
 The site is currently in a "coming soon" placeholder state while content is
 still being refined. See [§8 Current state](#8-current-state).
@@ -22,17 +27,17 @@ still being refined. See [§8 Current state](#8-current-state).
   is manual-only (workflow_dispatch), so pushes do not trigger deploys — they
   just publish to GitHub.
 - **The user triggers deploys manually** by clicking "Run workflow" on
-  *Deploy to Firebase Hosting (manual)* in GitHub Actions. Do not try to
-  reconfigure the workflow to auto-deploy on push without confirmation.
+  *Deploy to Firebase (manual)* in GitHub Actions. The workflow deploys
+  **hosting + functions + firestore** in one shot.
 - **Never paste secrets or service-account JSON into this sandbox.** The
-  Firebase service-account key already lives in the repo's GitHub Secrets
-  (`FIREBASE_SERVICE_ACCOUNT_TIMOTHYEHRLICHMD`) and the CI uses it from there.
+  Firebase service-account key lives in the repo's GitHub Secrets
+  (`FIREBASE_SERVICE_ACCOUNT_TIMOTHYEHRLICHMD`). The Resend API key lives in
+  Firebase Secret Manager (set via `firebase functions:secrets:set
+  RESEND_API_KEY` on the user's Mac — never in the repo).
 - **The user works from a Mac** that has Claude Code + Desktop Commander.
   This sandbox does *not* have Desktop Commander, browser access, or
   filesystem access to the Mac. Do not pretend to ssh, drive a browser, or
   reach the user's local machine.
-- **No phone or email of Dr. Ehrlich should appear on the public site.** The
-  user explicitly removed those placeholders.
 
 ## 3. Repo layout
 
@@ -44,27 +49,32 @@ still being refined. See [§8 Current state](#8-current-state).
 ├── admin.html                # Internal content editor — edits site-data.json,
 │                             # downloads it for re-commit. Not linked from
 │                             # the public site.
-├── intake.html               # Multi-step intake wizard host page
-├── intake.js                 # Wizard logic (state, routing, HRT form, review)
-├── script.js                 # Homepage hydration from site-data.json + contact
-│                             # form handoff to intake.html
+├── script.js                 # Homepage hydration + contact-form submit handler
 ├── styles.css                # Single global stylesheet (CSS variables in :root)
 ├── site-data.json            # Source of truth for all editable site copy
-├── firebase.json             # Hosting config (serves repo root, cleanUrls,
-│                             # ignores source artifacts and *.docx/*.pdf)
+├── firebase.json             # Hosting + Firestore + Functions config
 ├── .firebaserc               # Pinned to project "timothyehrlichmd"
+├── firestore.rules           # Lock down ALL Firestore access from web clients
+├── firestore.indexes.json    # (empty for now)
+├── functions/
+│   ├── package.json          # Node 20, firebase-functions ^6, resend ^4
+│   ├── index.js              # submitLead HTTP function
+│   └── .gitignore            # node_modules etc.
 ├── .github/workflows/
-│   └── firebase-hosting-deploy.yml   # Manual-trigger deploy to live channel
+│   └── firebase-hosting-deploy.yml   # Manual-trigger deploy (hosting+fns+firestore)
 ├── logo-blue.png             # Brand logo on light backgrounds (navbar, header)
 ├── logo-white.png            # Inverted logo for dark backgrounds (footer)
 ├── dr-ehrlich.jpg            # About-section photo (4:5 portrait)
 ├── TE FINAL LOGOS*.{pdf,jpeg,jpg}    # SOURCE artwork — not deployed (ignored)
-└── *.docx                    # SOURCE reference (intake questionnaire, consents,
-                              # patient education) — not deployed
+└── *.docx                    # SOURCE reference (intake questionnaires, consents,
+                              # patient education) — not deployed. Kept in the
+                              # repo as reference material for Dr. Ehrlich.
 ```
 
 `.docx`, `.pdf`, and `TE FINAL LOGOS*` files are reference material from the
 doctor; they are excluded from the deploy via `firebase.json` → `ignore`.
+The `functions/` directory is also excluded from Hosting; it's deployed
+separately as Cloud Functions.
 
 ## 4. Local development
 
@@ -79,6 +89,11 @@ python3 -m http.server 8765
 because `fetch('site-data.json')` won't work over `file://`. Always test via
 HTTP.
 
+**Note:** the contact-form submit (`POST /api/submitLead`) requires the
+Cloud Function to be deployed and reachable. It will not work from
+`python3 -m http.server` unless you also run the Firebase emulators
+(`firebase emulators:start --only functions,hosting`).
+
 ## 5. Deploy flow
 
 ```
@@ -88,18 +103,21 @@ HTTP.
     ↓
 [user clicks "Run workflow" in GitHub Actions]
     ↓
-[FirebaseExtended/action-hosting-deploy → live channel]
+[GitHub Actions runner installs functions deps,
+ then runs: firebase deploy --only hosting,functions,firestore]
     ↓
-[live at https://timothyehrlichmd.web.app/]
+[live at https://timothyehrlichmd.web.app/ and the custom domain
+ once DNS propagates]
 ```
 
-**To deploy:** GitHub → Actions → "Deploy to Firebase Hosting (manual)" →
-"Run workflow" → pick `main` → Run. Takes ~1 min.
+**To deploy:** GitHub → Actions → "Deploy to Firebase (manual)" → "Run
+workflow" → pick `main` → Run. Takes ~2-3 min.
 
-**Important workflow notes** (see [§10 Gotchas](#10-known-gotchas) for context):
-- Do not add `repoToken: ${{ secrets.GITHUB_TOKEN }}` back to the action step;
-  it caused git auth failures because we have restrictive `contents: read`
-  permissions.
+**Workflow gotchas to keep in place** (see [§11 Gotchas](#11-known-gotchas)
+for context):
+- Do not add `repoToken: ${{ secrets.GITHUB_TOKEN }}` to a Firebase action
+  step; it caused git auth failures previously because of restrictive
+  `contents: read` permissions.
 - `fetch-depth: 0` on the checkout step is required so the firebase CLI can
   read commit history locally without trying to fetch from origin.
 
@@ -133,7 +151,6 @@ Defined as CSS variables in `styles.css` `:root`. Stick to these.
 - `dr-ehrlich.jpg`, used in the About section
 - 4:5 portrait on desktop, 1:1 on mobile (CSS handles the crop)
 - Mobile uses `object-position: center 20%` to avoid cropping his forehead.
-  Do not touch this without re-checking on a phone-width viewport.
 
 ## 7. Content management
 
@@ -155,7 +172,7 @@ next deploy publishes it. Edits also auto-save to localStorage on every
 keystroke so refresh doesn't lose work.
 
 **If you change the schema** (add/remove/rename a field in `site-data.json`):
-1. Update bindings in `index.html` (or wherever rendered)
+1. Update bindings in `home.html` (or wherever rendered)
 2. Update the corresponding fieldset in `admin.html`
 3. Re-verify with a quick `grep` that no binding references a non-existent
    path
@@ -164,17 +181,23 @@ keystroke so refresh doesn't lose work.
 
 - ✅ Site is live at `https://timothyehrlichmd.web.app/` and
   `https://timothyehrlichmd.firebaseapp.com/`
+- ✅ Custom domain `timothyehrlichmd.com` registered and DNS pointed at
+  Firebase. Once propagation completes it'll serve the site.
+- ✅ Firebase project is on **Blaze** (required for Cloud Functions).
 - ⏳ The public sees the **coming-soon placeholder** at `/`. The real site
-  lives at `home.html` (preview at `*.web.app/home`).
-- ⏳ Custom domain `timothyehrlichmd.com` not yet purchased. Plan: buy at
-  Cloudflare Registrar, point apex + www at Firebase A records (DNS-only,
-  not proxied), let Firebase issue Let's Encrypt cert. See [§9](#9-firebase--external-accounts).
-- ⏳ Intake form Submit button is a stub. Will write to Firestore once BAA
-  is signed.
-- ⏳ Dr. Ehrlich's inbox / admin view for reading submissions: not built yet.
+  lives at `home.html` (preview at `*.web.app/home`). To go live, rename
+  `home.html` back to `index.html` (overwriting the placeholder), commit,
+  push, and trigger the manual deploy workflow.
+- ⏳ **`submitLead` function expects two pieces of bootstrap** before it
+  works end-to-end (see [§9 Setup](#9-firebase--external-accounts)):
+  1. `timothyehrlichmd.com` verified in Resend with DNS records added in
+     Cloudflare.
+  2. `RESEND_API_KEY` secret set in Firebase Secret Manager via the user's
+     Mac CLI.
+- ⏳ Service-account IAM roles for the GitHub Actions deploys may need to be
+  expanded — see [§11 Gotchas](#11-known-gotchas).
 
-**To take the site live (when ready):** rename `home.html` → `index.html`
-(overwriting the placeholder), commit, push, user triggers deploy.
+**To take the site live (when ready):**
 
 ```sh
 git mv -f home.html index.html
@@ -185,48 +208,81 @@ git push origin main
 
 ## 9. Firebase & external accounts
 
-- **Firebase project ID:** `timothyehrlichmd`
-- **Google Workspace primary domain:** `tbehrlichmd.com` (Dr. Ehrlich's
-  general-purpose business identity). The Workspace account owns the
-  Firebase project and signs the BAA.
-- **Website domain (planned):** `timothyehrlichmd.com` — separate from
-  Workspace primary domain; will be added as a secondary domain if email
-  on it is ever needed.
-- **GitHub repo:** `amstreet/UAT2`. The repo has one secret:
-  `FIREBASE_SERVICE_ACCOUNT_TIMOTHYEHRLICHMD` — the service-account JSON
-  uploaded by `firebase init` during initial setup. Don't regenerate
-  unless rotating keys.
+- **Firebase project ID:** `timothyehrlichmd` (on Blaze plan)
+- **Firestore region:** `us-central1` (default — set in `functions/index.js`
+  and `firebase.json` rewrite)
+- **GitHub repo:** `amstreet/UAT2`. Repo secrets:
+  - `FIREBASE_SERVICE_ACCOUNT_TIMOTHYEHRLICHMD` — service-account JSON used
+    by the deploy workflow.
+- **Firebase Function secrets** (managed by Google Secret Manager, set via
+  CLI on the user's Mac — NOT in the repo):
+  - `RESEND_API_KEY` — Resend API key. Set with
+    `firebase functions:secrets:set RESEND_API_KEY` and paste when prompted.
+- **Email delivery:** Resend.
+  - From address: `Timothy Ehrlich, MD <contact@timothyehrlichmd.com>`
+    (hardcoded in `functions/index.js`). Requires `timothyehrlichmd.com` to
+    be verified as a sending domain in Resend.
+  - Destination: `Tbehrlichmd@gmail.com` (hardcoded — Dr. Ehrlich's personal
+    Gmail; fine because no PHI).
+  - Reply-To is set to the patient's email so Dr. Ehrlich just clicks Reply.
+- **Domain plan:** `timothyehrlichmd.com` for the website (already registered
+  via Cloudflare Registrar). DNS in Cloudflare. Keep records as **DNS only**
+  (gray cloud), not Proxied — Cloudflare's proxy interferes with Firebase TLS
+  provisioning. The Workspace primary domain `tbehrlichmd.com` is separate
+  and unrelated.
 
-## 10. HIPAA & compliance
+## 10. HIPAA / scope rationale
 
-**This is a real medical practice. The intake form collects Protected
-Health Information (PHI).** Several decisions follow from this:
+**The contact form does NOT collect PHI.** It collects only name, phone,
+email, and which services the visitor is interested in. That last field
+(interest in TRT / hair / weight) is technically a hint but is treated as an
+inquiry, not a medical record. No symptoms, no contraindications, no medical
+history.
 
-1. **A Google BAA must be signed** before the intake form can accept
-   real patient submissions. The BAA is requested via Google Workspace
-   admin console.
-2. **Only HIPAA-eligible Google Cloud services may be used.** Firestore
-   ✓. Cloud Functions ✓. Firebase Auth ✓. **Crashlytics ✗.** **Google
-   Analytics for Firebase ✗.** When wiring the SDK, do not initialize
-   the latter two.
-3. **Submissions must not flow through email.** No `mailto:`, no
-   notification email that includes PHI. The admin inbox (when built)
-   stays inside Firestore behind auth.
-4. **The Firebase Hosting Spark plan does not support BAA** — the
-   project must be on the **Blaze (pay-as-you-go) plan** before any
-   PHI flow goes live. Hosting alone (no submissions) is fine on Spark.
+Because no PHI is in scope:
+- No BAA with Google is required for this site.
+- Dr. Ehrlich's personal Gmail is a fine destination for the notification.
+- Spark would have technically worked too, but Blaze was needed anyway for
+  Cloud Functions (the v2 functions used here aren't available on Spark for
+  new projects).
 
-The user is aware of all of the above. Do not silently skip these — flag
-them again if a future change risks violating them.
+**If the scope ever changes** and the form starts collecting PHI:
+1. The practice MUST sign a Google BAA before any patient submits.
+2. Only HIPAA-eligible Google Cloud services may be used. Firestore and
+   Cloud Functions ✓. Firebase Crashlytics and Firebase Analytics ✗.
+3. The notification flow must NOT carry PHI in email. Use "you have a new
+   submission, log in to review" only; PHI stays in Firestore.
+4. The destination must change from a personal Gmail to a Workspace inbox
+   covered by the BAA.
+
+The intake-wizard code that originally collected medical history was
+removed in the same commit that introduced the lead-only architecture. The
+reference docs (`Testosterone Intake Questionnaire.docx`, etc.) remain in
+the repo as source material — they are excluded from the deploy.
 
 ## 11. Known gotchas
 
 - **`actions/checkout@v4` with depth 1 + FirebaseExtended action = git
-  auth failures.** Always use `fetch-depth: 0`. Do not re-add `repoToken`
-  to the deploy step (it's only for preview-channel PR comments).
-- **Cloudflare orange-cloud proxy will break Firebase TLS issuance.** When
-  the custom domain is added, set the DNS records to "DNS only" (gray
-  cloud), not Proxied.
+  auth failures.** Always use `fetch-depth: 0`.
+- **GitHub Actions service-account IAM**: the service account created by
+  `firebase init` for hosting may not have permission to deploy Functions
+  and Firestore rules. If the deploy fails with permission errors, the user
+  needs to add these roles to the
+  `github-action-<id>@timothyehrlichmd.iam.gserviceaccount.com` service
+  account in GCP IAM:
+  - `roles/cloudfunctions.developer`
+  - `roles/iam.serviceAccountUser`
+  - `roles/firebase.rules.admin` (or `roles/firebaserules.admin`)
+  - `roles/cloudbuild.builds.editor` (Functions v2 uses Cloud Build)
+  - `roles/artifactregistry.writer` (Functions v2 stores artifacts here)
+  - `roles/serviceusage.serviceUsageConsumer`
+  Or just `roles/firebase.admin` for breadth in a low-risk solo project.
+- **Resend domain verification**: until `timothyehrlichmd.com` is verified
+  in Resend (DNS records added in Cloudflare), the function will fail to
+  send emails. The Firestore record still saves; check the
+  `notificationError` field on a `leads` document to confirm.
+- **Cloudflare orange-cloud proxy will break Firebase TLS issuance.** Keep
+  DNS records as "DNS only" (gray cloud), not Proxied.
 - **`fetch('site-data.json')` fails on `file://` previews.** Always test
   via HTTP (`python3 -m http.server`).
 - **The Firebase Console "App Hosting" product is NOT what we use.** Use
@@ -234,68 +290,86 @@ them again if a future change risks violating them.
   SSR frameworks and is wrong for this static site.
 - **SPA-rewrite (`rewrites: ** -> /index.html`) is intentionally NOT
   enabled** in `firebase.json` because the site has multiple HTML pages
-  (`admin.html`, `intake.html`). `cleanUrls: true` is enabled, so
-  `/admin` and `/intake` resolve correctly without the `.html` extension.
+  (`admin.html`, `home.html`). `cleanUrls: true` is enabled, so `/admin`
+  and `/home` resolve correctly without the `.html` extension. The only
+  rewrite is `/api/submitLead` → the `submitLead` Cloud Function.
 - **Mobile photo crop:** `.about-photo-img { object-position: center 20% }`
   inside `@media (max-width: 1024px)` keeps Dr. Ehrlich's forehead from
   being clipped. Don't touch unless verifying on a phone-width viewport.
 
-## 12. Intake wizard architecture
+## 12. Contact form architecture
 
-`/intake.html` is a hash-routed multi-step wizard driven by `intake.js`.
+`home.html` contains a single `<form id="contactForm">` with four fields:
+**Name**, **Phone**, **Email**, and **Interests** (multi-select checkboxes
+for hair/weight/hrt). A honeypot input named `website` is hidden via the
+`.hp-field` CSS class — real users don't see it, bots fill it, and the
+function silently drops those submissions.
 
-- **Entry point:** the homepage contact form (`#contactForm` on the real
-  site at `home.html`) saves contact info to `localStorage` under key
-  `intake.draft` and navigates to `intake.html`.
-- **Step registry:** each step is registered via `registerStep({ id,
-  label, when, render })`. The `when(interests)` predicate decides if
-  the step shows; `interests` is the array from the contact form
-  checkboxes (`hair`, `weight`, `hrt`).
-- **Steps currently registered:**
-  - `hair` — placeholder ("intake form coming soon")
-  - `weight` — placeholder
-  - `hrt` — **fully built** from `Testosterone Intake Questionnaire.docx`
-    (10 sections). Auto-saves on every keystroke.
-  - `review` — per-section summary with "Edit this section" buttons
-    that round-trip back to the relevant step pre-filled
-    (`?return=review` query string in the hash)
-  - `submitted` — confirmation. **Currently a stub** — does not actually
-    persist anywhere off the user's browser. Will be wired to Firestore
-    once BAA is in place.
-- **Generic form ⇄ state binding** (in `intake.js`):
-  - `name="dot.path.in.state"` on every input → `setByPath(state, name, value)`
-  - Checkboxes → boolean; radios → checked value; text → string
-  - `data-list="true"` on a textarea → split lines into a string array
-  - `fillForm(formEl, state)` does the reverse for prefill
+**Submit flow:**
 
-To add a new intake form for hair or weight: drop a new `registerStep({...})`
-above the `review` step (the ordering helper `reorderSteps()` will keep
-review/submitted at the end). Use the existing HRT step as a template;
-the generic collect/fill helpers handle persistence automatically.
+```
+Patient fills form → script.js submit handler
+    → POST /api/submitLead  (same-origin via firebase.json rewrite)
+        → submitLead Cloud Function (Node 20, v2 HTTPS function)
+            ↙                       ↘
+        Firestore `leads`         Resend  → Dr. Ehrlich's Gmail
+        (system of record)        (notification with Reply-To = patient)
+    ← JSON { ok: true, leadId }
+    → script.js swaps form for success state
+```
+
+The Cloud Function lives in `functions/index.js`. It:
+1. Validates required fields (name, phone, email) and email format
+2. Drops bot submissions where the honeypot field is filled
+3. Writes a document to the `leads` collection with a server timestamp
+4. Sends a notification email via Resend (Reply-To = patient's email so
+   Dr. Ehrlich just clicks Reply)
+5. If the email send fails, logs the error on the Firestore document
+   (`notificationError`, `notificationErrorAt` fields) so a missed
+   notification can be found and re-sent
+
+**Firestore `leads` schema:**
+
+```
+{
+  name: string,
+  phone: string,
+  email: string,
+  interests: string[],         // any of ['hair', 'weight', 'hrt']
+  userAgent: string,
+  ip: string,
+  createdAt: Timestamp,
+  notificationError?: string,  // present only if Resend failed
+  notificationErrorAt?: Timestamp
+}
+```
+
+**Reading leads:** Dr. Ehrlich uses the **Firebase Console** for now (no
+admin UI built). Firestore rules deny all client access — only the Admin
+SDK (Cloud Functions) and IAM-authenticated Console can read.
 
 ## 13. Tracked decisions and history
 
 A condensed history so future sessions don't repeat conversations:
 
 - **Branding:** the doctor picked the **blue** logo variant (over the green).
-  All colors in §6 are derived from that. There's a high-res source
-  `TE FINAL LOGOS_hr.jpg`; the two PNGs in use are generated from it.
-- **Navbar:** white opaque background (no translucency), 76px tall, 52px logo.
-- **Photo:** auto-loads `dr-ehrlich.jpg`; falls back to placeholder if
-  missing (`onerror="this.remove()"`).
-- **Branch policy:** old work happened on `claude/read-eps-files-K5HJb`; the
-  user later directed all future work to `main` directly. That branch is
-  defunct; do not push to it.
+  All colors in §6 are derived from that.
 - **Hosting choice:** classic Firebase Hosting (not App Hosting), repo root
   as public dir, manual deploy via workflow_dispatch, no auto-deploy on push.
-- **Domain choice:** `timothyehrlichmd.com` for the website (planned via
-  Cloudflare Registrar), separate from `tbehrlichmd.com` which is Dr.
-  Ehrlich's Workspace primary.
-- **Coming-soon mode:** in effect as of commit `34d5afe`. Real site at
-  `home.html`. To go live, rename back to `index.html`.
-- **Deploy workflow fix:** commit `fb1eab5` removed `repoToken` and added
-  `fetch-depth: 0` after the second deploy failed with git auth errors.
-  Do not undo this.
+- **Domain choice:** `timothyehrlichmd.com` for the website (registered via
+  Cloudflare Registrar), separate from `tbehrlichmd.com` which is reserved
+  for Workspace.
+- **Coming-soon mode:** in effect. Real site at `home.html`. To go live,
+  rename back to `index.html`.
+- **Deploy workflow fix:** removed `repoToken` and added `fetch-depth: 0`
+  after a deploy failed with git auth errors. Do not undo this.
+- **Scope decision:** form is contact-only, no PHI. The original multi-step
+  intake wizard with medical-history collection (`intake.html`/`intake.js`)
+  was deleted when this decision was made. Do not reintroduce PHI fields
+  without first making the BAA / compliance decisions in §10.
+- **Architecture decision:** server-side submit handling (Cloud Functions +
+  Firestore + Resend) chosen over the simpler client-side approach for
+  validation, abuse protection, schema control, and future flexibility.
 
 ## 14. Useful commands
 
@@ -303,21 +377,23 @@ A condensed history so future sessions don't repeat conversations:
 # preview locally (on the Mac, in the repo dir)
 python3 -m http.server 8765
 
-# add the manual-deploy workflow into your normal cycle
+# emulate functions locally too (covers the /api/submitLead path)
+firebase emulators:start --only functions,hosting
+
+# set the Resend API key in Firebase Secret Manager (one-time, on the Mac)
+firebase functions:secrets:set RESEND_API_KEY
+
+# normal change cycle
 git add <files>
 git commit -m "<message>"
 git push origin main
-# then: GitHub → Actions → "Deploy to Firebase Hosting (manual)" → Run workflow
+# then: GitHub → Actions → "Deploy to Firebase (manual)" → Run workflow
 
 # go live (swap placeholder for real homepage)
 git mv -f home.html index.html
 git commit -m "Go live"
 git push origin main
 
-# go back into WIP mode (re-hide the real site behind the placeholder)
-# (requires recreating the coming-soon index.html from the commit that
-# introduced it, or from CLAUDE.md history; the simplest is to revert the
-# "go live" commit)
-git revert <go-live-sha>
-git push origin main
+# tail function logs (on the Mac)
+firebase functions:log
 ```

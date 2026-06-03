@@ -1104,6 +1104,33 @@ input, textarea, button {
   margin-top: var(--space-md);
 }
 
+/* Honeypot — hidden off-screen but reachable to bots */
+.hp-field {
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Inline form error message */
+.form-error {
+  background: rgba(196, 91, 91, 0.08);
+  border: 1px solid rgba(196, 91, 91, 0.25);
+  color: var(--color-error);
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--radius);
+  font-size: 0.88rem;
+  margin-bottom: var(--space-md);
+}
+
+.btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 /* Form success */
 .form-success {
   text-align: center;

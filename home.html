@@ -435,27 +435,27 @@
           </p>
         </div>
         <div class="contact-form-card">
-          <form class="contact-form" id="contactForm">
+          <form class="contact-form" id="contactForm" novalidate>
             <div class="form-row">
               <div class="form-group">
                 <label for="name" data-content="contact.form.nameLabel">Full Name</label>
-                <input type="text" id="name" name="name" required placeholder="Your name" data-content-attr="placeholder" data-content="contact.form.namePlaceholder">
+                <input type="text" id="name" name="name" required autocomplete="name" placeholder="Your name" data-content-attr="placeholder" data-content="contact.form.namePlaceholder">
               </div>
               <div class="form-group">
-                <label for="email" data-content="contact.form.emailLabel">Email</label>
-                <input type="email" id="email" name="email" required placeholder="you@example.com" data-content-attr="placeholder" data-content="contact.form.emailPlaceholder">
+                <label for="phone" data-content="contact.form.phoneLabel">Phone</label>
+                <input type="tel" id="phone" name="phone" required autocomplete="tel" placeholder="(555) 123-4567" data-content-attr="placeholder" data-content="contact.form.phonePlaceholder">
               </div>
             </div>
             <div class="form-group">
-              <label for="phone" data-content="contact.form.phoneLabel">Phone (optional)</label>
-              <input type="tel" id="phone" name="phone" placeholder="(555) 123-4567" data-content-attr="placeholder" data-content="contact.form.phonePlaceholder">
+              <label for="email" data-content="contact.form.emailLabel">Email</label>
+              <input type="email" id="email" name="email" required autocomplete="email" placeholder="you@example.com" data-content-attr="placeholder" data-content="contact.form.emailPlaceholder">
             </div>
             <div class="form-group">
-              <label data-content="contact.form.interestsLabel">I'm interested in:</label>
+              <label data-content="contact.form.interestsLabel">Which service(s) are you interested in?</label>
               <div class="interest-chips">
                 <label class="chip">
                   <input type="checkbox" name="interest" value="hair">
-                  <span class="chip-label" data-content="contact.form.interestHair">Hair Restoration</span>
+                  <span class="chip-label" data-content="contact.form.interestHair">Hair Loss Restoration</span>
                 </label>
                 <label class="chip">
                   <input type="checkbox" name="interest" value="weight">
@@ -463,15 +463,17 @@
                 </label>
                 <label class="chip">
                   <input type="checkbox" name="interest" value="hrt">
-                  <span class="chip-label" data-content="contact.form.interestHrt">Hormone Therapy</span>
+                  <span class="chip-label" data-content="contact.form.interestHrt">Testosterone Replacement</span>
                 </label>
               </div>
             </div>
-            <div class="form-group">
-              <label for="message" data-content="contact.form.messageLabel">Message (optional)</label>
-              <textarea id="message" name="message" rows="4" placeholder="Tell Dr. Ehrlich about your goals or questions..." data-content-attr="placeholder" data-content="contact.form.messagePlaceholder"></textarea>
+            <!-- honeypot — must remain empty; real users don't see this -->
+            <div class="hp-field" aria-hidden="true">
+              <label for="website">Website</label>
+              <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
             </div>
-            <button type="submit" class="btn btn-primary btn-block" data-content="contact.form.submitLabel">Next</button>
+            <p class="form-error" id="formError" role="alert" hidden></p>
+            <button type="submit" class="btn btn-primary btn-block" id="formSubmit" data-content="contact.form.submitLabel">Send Message</button>
             <p class="form-note" data-content="contact.form.note">Dr. Ehrlich personally reviews every inquiry.</p>
           </form>
         </div>

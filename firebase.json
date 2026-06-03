@@ -5,6 +5,7 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**",
+      "functions/**",
       "TE FINAL LOGOS*",
       "*.docx",
       "*.pdf",
@@ -19,6 +20,33 @@
           { "key": "Cache-Control", "value": "no-cache" }
         ]
       }
+    ],
+    "rewrites": [
+      {
+        "source": "/api/submitLead",
+        "function": {
+          "functionId": "submitLead",
+          "region": "us-central1"
+        }
+      }
     ]
-  }
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        ".env",
+        ".env.*"
+      ]
+    }
+  ]
 }
