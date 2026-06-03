@@ -23,9 +23,7 @@ const RESEND_API_KEY = defineSecret('RESEND_API_KEY');
 
 // Where the notification email gets sent. Not a secret — change in code if
 // it needs to move (e.g. to a practice inbox once Workspace is set up).
-// TEMPORARY: test inbox for internal reply-to testing. Change back to
-// Tbehrlichmd@gmail.com before going live.
-const DESTINATION_EMAIL = 'connoly252@me.com';
+const DESTINATION_EMAIL = 'Tbehrlichmd@gmail.com';
 
 // The From address shown to Dr. Ehrlich. Must be on a domain verified in
 // Resend. Until the domain is verified, change this to the Resend
