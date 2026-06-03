@@ -3,7 +3,6 @@
    ========================================================================== */
 
 const SITE_DATA_URL = 'site-data.json';
-const LOCAL_DRAFT_KEY = 'siteData.draft';
 
 function getByPath(obj, path) {
   if (!obj || !path) return undefined;
@@ -14,15 +13,12 @@ function getByPath(obj, path) {
 }
 
 async function loadSiteData() {
+  // If the fetch fails (e.g. file:// preview), the page keeps the defaults
+  // baked into the HTML.
   try {
     const res = await fetch(SITE_DATA_URL, { cache: 'no-store' });
     if (res.ok) return await res.json();
-  } catch (_) { /* fall through */ }
-  // Fallback: a draft saved by the admin tool in this browser
-  try {
-    const draft = localStorage.getItem(LOCAL_DRAFT_KEY);
-    if (draft) return JSON.parse(draft);
-  } catch (_) { /* ignore */ }
+  } catch (_) { /* fall through to baked-in HTML defaults */ }
   return null;
 }
 

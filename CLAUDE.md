@@ -46,9 +46,6 @@ still being refined. See [§8 Current state](#8-current-state).
 ├── index.html                # PUBLIC home — currently the "coming soon" placeholder
 ├── home.html                 # REAL home page — renamed from index.html while
 │                             # in WIP mode. Preview at *.web.app/home.
-├── admin.html                # Internal content editor — edits site-data.json,
-│                             # downloads it for re-commit. Not linked from
-│                             # the public site.
 ├── script.js                 # Homepage hydration + contact-form submit handler
 ├── styles.css                # Single global stylesheet (CSS variables in :root)
 ├── site-data.json            # Source of truth for all editable site copy
@@ -165,16 +162,14 @@ the homepage. The HTML elements that get hydrated carry one of:
 `script.js` does the hydration on page load. Defaults are also baked into the
 HTML so the page still renders if `site-data.json` is unavailable.
 
-**The doctor (or admin) edits content via `/admin.html`** — a form pre-filled
-from the current `site-data.json` that downloads an updated copy on submit.
-The downloaded file replaces the one in the repo, gets committed, and the
-next deploy publishes it. Edits also auto-save to localStorage on every
-keystroke so refresh doesn't lose work.
+**Content is edited directly in `site-data.json` via Claude Code**, then
+committed and deployed. (There used to be an `/admin.html` browser-based
+editor; it was removed because exposing a content-editing page on the open
+internet was an unnecessary risk. Edit the JSON in the repo instead.)
 
 **If you change the schema** (add/remove/rename a field in `site-data.json`):
 1. Update bindings in `home.html` (or wherever rendered)
-2. Update the corresponding fieldset in `admin.html`
-3. Re-verify with a quick `grep` that no binding references a non-existent
+2. Re-verify with a quick `grep` that no binding references a non-existent
    path
 
 ## 8. Current state
@@ -290,9 +285,9 @@ the repo as source material — they are excluded from the deploy.
   SSR frameworks and is wrong for this static site.
 - **SPA-rewrite (`rewrites: ** -> /index.html`) is intentionally NOT
   enabled** in `firebase.json` because the site has multiple HTML pages
-  (`admin.html`, `home.html`). `cleanUrls: true` is enabled, so `/admin`
-  and `/home` resolve correctly without the `.html` extension. The only
-  rewrite is `/api/submitLead` → the `submitLead` Cloud Function.
+  (`index.html`, `home.html`). `cleanUrls: true` is enabled, so `/home`
+  resolves without the `.html` extension. The only rewrite is
+  `/api/submitLead` → the `submitLead` Cloud Function.
 - **Mobile photo crop:** `.about-photo-img { object-position: center 20% }`
   inside `@media (max-width: 1024px)` keeps Dr. Ehrlich's forehead from
   being clipped. Don't touch unless verifying on a phone-width viewport.
