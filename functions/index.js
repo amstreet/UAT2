@@ -155,8 +155,10 @@ exports.submitLead = onRequest(
         await resend.emails.send({
           from: FROM_EMAIL,
           to: DESTINATION_EMAIL,
-          // Resend's API field is snake_case reply_to. So Dr. Ehrlich can
-          // reply straight to the patient, set it to the submitter's email.
+          // Set reply-to so Dr. Ehrlich can reply straight to the patient.
+          // Different Resend SDK versions accept replyTo (camelCase) vs
+          // reply_to (snake_case); set both so whichever is honored wins.
+          replyTo: email,
           reply_to: email,
           subject,
           html,
